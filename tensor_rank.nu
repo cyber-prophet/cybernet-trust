@@ -1,6 +1,14 @@
 #tensor_rank
 let $graph = (cy graph-links-df --include_contracts)
 
+let $links_nu = ($graph | dfr select particle_from particle_to | dfr into-nu)
+
+print {
+    'total links count': ($links_nu | length)
+    'unique links count': ($links_nu | uniq-by particle_from particle_to | length)
+    'repeated links unique count': ($links_nu | uniq-by particle_from particle_to --repeated | length)
+}
+
 $graph
 | cy graph-neurons-stats
 | dfr select [neuron, nickname, links_count, karma, first_link]
@@ -8,7 +16,7 @@ $graph
 | dfr into-nu
 | rename --column {index: neuron_id}
 | move neuron_id --after neuron
-| save '1_0_neuronid.csv'
+| save -f '1_0_neuronid.csv'
 
 '1_1_neurons_balances.yaml'
 | if ($in | path exists) { rm $in }
